@@ -1,7 +1,7 @@
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 const mongoose = require('mongoose');
-const { app } = require('./app');
+const { app } = require('../app');
 
 app.use(session({
   // secret est utilisé par express-session pour signer le cookie
