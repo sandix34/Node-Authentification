@@ -6,6 +6,8 @@ const router = require('./routes');
 // exporter l'app Express pour l'utiliser dans session.config.js
 exports.app = app;
 require('./config/sessions.config');
+// import fichier de configuration passport ⚠️ après celui pour les sessions
+require('./config/passport.config');
 
 
 app.set('views', path.join(__dirname, 'views'));
