@@ -6,7 +6,7 @@ exports.sessionNew = (req, res, next) => {
 
 exports.sessionCreate = (req, res, next) => {
   // premier paramètre --> authentification avec la stratégie local
-  // dauxilème paramètre --> une fonction de callback 
+  // deuxième paramètre --> une fonction de callback 
   passport.authenticate('local', (err, user, info) => {
     // si une erreur serveur, passe next pour rediriger vers le middleware de gestion d'erreur
     if (err) {
@@ -28,6 +28,6 @@ exports.sessionCreate = (req, res, next) => {
 }
 
 exports.sessionDelete = (req, res, next) => {
-  // TODO
-  res.end();
+  req.logout();
+  res.redirect('/auth/signin/form');
 }
