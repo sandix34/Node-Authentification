@@ -2,12 +2,12 @@ const passport = require('passport');
 const { app } = require('../app');
 const User = require('../database/models/user.model');
 const LocalStrategy = require('passport-local').Strategy;
+const { findUserPerEmail, findUserPerGoogleId } = require('../queries/user.queries');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const dotenv = require ('dotenv'); 
 dotenv.config ();
 const clientId = process.env.CLIENT_ID
 const clientSecret = process.env.CLIENT_SECRET
-const { findUserPerEmail } = require('../queries/user.queries');
 
 // middleware qui initialise passport
 // crée un objet vide sur la requête et y place une instance de passport
@@ -56,7 +56,28 @@ passport.use('google', new GoogleStrategy({
   clientID: clientId,
   clientSecret: clientSecret,
   callbackURL: '/auth/google/cb'
-}, (accessToken, refreshToken, profile, done) => {
-    console.log(profile);
-    done(null, false); 
-}));
+}, async (accessToken, refreshToken, profile, done) => {
+  // console.log(profile);
+  try {
+    // récupére l'utilisateur en utilisant GoogleId
+    const user = await findUserPerGoogleId(profile.id);
+    // si un utilisateur passe à Passeport
+    if (user) {
+      done(null, user);
+      // sinon créer l'utilisateur
+    } else {
+      const newUser = new User({
+        username: profile.displayName,
+        local: {
+          googleId: profile.id,
+          email: profile.emails[0].value
+        }
+      })
+      const savedUser = await newUser.save();
+      // retourne l'utilisateur crée à Passport
+      done(null, savedUser);
+    }
+  } catch(e) {
+    done(e);
+  }
+}))
